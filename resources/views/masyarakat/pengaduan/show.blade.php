@@ -6,6 +6,11 @@
     <div class="container-fluid py-4">
         <div class="card shadow-sm">
             <div class="card-body">
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
 
                 <h4 class="fw-bold mb-3">{{ $pengaduan->judul }}</h4>
 
@@ -28,7 +33,7 @@
                 @if ($pengaduan->foto)
                     <hr>
                     <p><strong>Foto:</strong></p>
-                    <img src="{{ asset('storage/' . $pengaduan->foto) }}" class="img-fluid rounded" style="max-width: 400px">
+                    <img src="{{ asset('storage/' . $pengaduan->foto) }}" class="img-fluid rounded" style="max-width: 300px">
                 @endif
                 <hr>
 
@@ -45,6 +50,74 @@
                     </ul>
                 @else
                     <p>Belum ada tanggapan.</p>
+                @endif
+
+                @php
+                    $lamaHari = $pengaduan->created_at->diffInDays(now());
+                @endphp
+
+                @if (in_array($pengaduan->status->status, ['Pending', 'Proses']) && $lamaHari >= 3 && !$pengaduan->is_complain)
+                    <div class="alert alert-warning mt-3 no-print">
+                        <strong>Ajukan Komplain</strong>
+                        <p class="mb-2">
+                            Pengaduan ini belum ditanggapi dalam waktu lama.
+                            Silakan jelaskan keluhan Anda.
+                        </p>
+
+                        <form action="{{ route('pengaduan.komplain', $pengaduan->id_pengaduan) }}" method="POST">
+                            @csrf
+
+                            <div class="mb-2">
+                                <textarea name="isi_komplain" class="form-control @error('isi_komplain') is-invalid @enderror" rows="3"
+                                    placeholder="Tuliskan alasan komplain Anda..." required></textarea>
+
+                                @error('isi_komplain')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <button type="submit" class="btn btn-warning btn-sm"
+                                onclick="return confirm('Ajukan komplain atas pengaduan ini?')">
+                                Kirim Komplain
+                            </button>
+                        </form>
+                    </div>
+                @endif
+
+                @if ($pengaduan->is_complain && $pengaduan->status->status === 'Selesai' && $pengaduan->tanggapan->count() > 0)
+                    {{-- KOMPLAIN SUDAH DITANGGAPI --}}
+                    <div class="alert alert-success mt-3 no-print">
+                        <strong>Komplain Telah Ditanggapi</strong><br>
+                        <p class="mb-1">
+                            Komplain pengaduan Anda telah ditindaklanjuti dan diselesaikan oleh admin.
+                        </p>
+
+                        @if ($pengaduan->isi_komplain)
+                            <div class="mt-2">
+                                <strong>Isi Komplain Anda:</strong>
+                                <p class="mb-0 fst-italic">
+                                    "{{ $pengaduan->isi_komplain }}"
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                @elseif ($pengaduan->is_complain)
+                    {{-- KOMPLAIN MASIH MENUNGGU --}}
+                    <div class="alert alert-danger mt-3 no-print">
+                        <strong>Pengaduan Dikomplain</strong><br>
+                        <p class="mb-1">
+                            Pengaduan ini telah dikomplain dan sedang menunggu perhatian admin.
+                        </p>
+
+                        @if ($pengaduan->isi_komplain)
+                            <div class="mt-2">
+                                <strong>Isi Komplain:</strong>
+                                <p class="mb-0 fst-italic">
+                                    "{{ $pengaduan->isi_komplain }}"
+                                </p>
+                            </div>
+                        @endif
+                    </div>
                 @endif
 
                 <hr>
@@ -66,7 +139,7 @@
                         <span
                             class="timeline-dot {{ in_array($pengaduan->status->status, ['Pending', 'Proses', 'Selesai', 'Ditolak']) ? 'bg-success' : 'bg-secondary' }}"></span>
                         <div class="timeline-content">
-                            <strong>Menunggu verifikasi</strong>
+                            <strong>Menunggu Tanggapan</strong>
                         </div>
                     </li>
 
@@ -121,10 +194,15 @@
                 @endif
 
                 <hr>
-                <a href="{{ route('pengaduan.masyarakat.index') }}" class="btn btn-secondary btn-sm">
-                    Kembali
-                </a>
+                <div class="no-print mt-3">
+                    <a href="{{ route('pengaduan.masyarakat.index') }}" class="btn btn-secondary btn-sm">
+                        Kembali
+                    </a>
 
+                    <button onclick="window.print()" class="btn btn-primary btn-sm">
+                        Cetak
+                    </button>
+                </div>
             </div>
         </div>
     </div>

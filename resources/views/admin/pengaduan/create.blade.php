@@ -62,8 +62,8 @@
                     @enderror
 
                     <div class="mb-3">
-                        <label for="foto" class="form-label">Foto Bukti(Jika ada) </label>
-                        <input type="file" class="form-control" id="foto" name="foto">
+                        <label for="foto" class="form-label">Foto Bukti</label>
+                        <input type="file" class="form-control" id="foto" name="foto" required>
                     </div>
                     @error('foto')
                         <div class="alert alert-danger">{{ $message }}</div>

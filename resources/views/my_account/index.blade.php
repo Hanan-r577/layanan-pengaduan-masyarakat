@@ -1,4 +1,4 @@
-@extends('layouts.masyarakat')
+@extends('layouts.admin')
 
 @section('title', 'My Account')
 
@@ -43,7 +43,9 @@
                         </div>
                     </div>
                 </div>
-
+                <div class="d-grid">
+                    <a href="{{ route('dashboard') }}" class="btn btn-secondary m-2 mx-auto">Kembali Ke Dashboard</a>
+                </div>
             </div>
         </div>
     </div>

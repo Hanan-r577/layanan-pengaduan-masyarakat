@@ -9,7 +9,7 @@ class MasyarakatController extends Controller
 {
     public function index()
     {
-        // default untuk guest
+        // default untuk guest  
         $data = [
             'pengaduan' => collect(),
             'totalPengaduan' => 0,

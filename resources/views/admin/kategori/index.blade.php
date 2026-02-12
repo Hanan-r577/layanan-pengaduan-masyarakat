@@ -11,6 +11,10 @@
                     <div class="alert alert-success">
                         {{ session('success') }}
                     </div>
+                @elseif (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
                 @endif
 
                 <a href="{{ route('kategori.create') }}" class="btn btn-primary mb-3"> Tambah Kategori </a>

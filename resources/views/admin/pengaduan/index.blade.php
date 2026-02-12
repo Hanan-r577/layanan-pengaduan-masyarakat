@@ -27,7 +27,6 @@
                             value="{{ request('tanggal_sampai') }}">
                     </div>
 
-
                     <div class="col-md-3">
                         <label class="form-label">Kategori</label>
                         <select name="kategori_id" class="form-select">
@@ -61,6 +60,7 @@
                                 <th>Foto Bukti</th>
                                 <th>Tanggal dibuat</th>
                                 <th>Status</th>
+                                <th>Tanggal Komplain</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -78,15 +78,44 @@
                                     <td>
                                         @if ($item->foto)
                                             <a href="{{ asset('storage/' . $item->foto) }}" target="_blank">
-                                            <img src="{{ asset('storage/' . $item->foto) }}" alt="Foto"
+                                                <img src="{{ asset('storage/' . $item->foto) }}" alt="Foto"
                                                     style="width: 100px; height: auto;">
                                             </a>
                                         @else
                                             Tidak ada foto
                                         @endif
                                     </td>
-                                    <td>{{ $item->created_at }}</td>
-                                    <td>{{ $item->status->status }}</td>
+                                    <td>{{ $item->created_at->format('d M Y H:i') }}</td>
+                                    <td>
+                                        {{ $item->status->status }}
+
+                                        @if ($item->is_complain && $item->status->status != 'Selesai')
+                                            <button class="btn btn-sm btn-outline-danger mt-1" data-bs-toggle="modal"
+                                                data-bs-target="#komplainProsesModal{{ $item->id_pengaduan }}">
+                                                ⚠ Komplain
+                                            </button>
+                                        @elseif ($item->is_complain && $item->status->status == 'Selesai')
+                                            <button class="btn btn-sm btn-outline-success mt-1" data-bs-toggle="modal"
+                                                data-bs-target="#komplainSelesaiModal{{ $item->id_pengaduan }}">
+                                                Komplain Selesai
+                                            </button>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($item->is_complain && $item->tanggal_komplain)
+                                            @if ($item->status->status == 'Selesai')
+                                                <span class="text-success fw-semibold">
+                                                    {{ \Carbon\Carbon::parse($item->tanggal_komplain)->format('d M Y') }}
+                                                </span>
+                                            @else
+                                                <span class="text-danger fw-semibold">
+                                                    {{ \Carbon\Carbon::parse($item->tanggal_komplain)->format('d M Y') }}
+                                                </span>
+                                            @endif
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
                                     <td class="align-middle text-center">
                                         <div class="d-grid gap-1">
 
@@ -168,6 +197,96 @@
                                         </form>
                                     </div>
                                 </div>
+
+                                @if ($item->is_complain && $item->status->status != 'Selesai')
+                                    <div class="modal fade" id="komplainProsesModal{{ $item->id_pengaduan }}"
+                                        tabindex="-1">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+
+                                                <div class="modal-header bg-warning">
+                                                    <h5 class="modal-title">
+                                                        Komplain Pengaduan (Belum Selesai)
+                                                    </h5>
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+
+                                                <div class="modal-body">
+                                                    <p><strong>Dari Pengadu:</strong></p>
+                                                    <p>{{ $item->user->nama }}</p>
+                                                    <p><strong>Isi Komplain:</strong></p>
+                                                    <div class="border rounded p-3 bg-light mb-3">
+                                                        {{ $item->isi_komplain }}
+                                                    </div>
+
+                                                    <p class="text-muted mb-0">
+                                                        Tanggal Komplain:
+                                                        {{ \Carbon\Carbon::parse($item->tanggal_komplain)->format('d M Y') }}
+                                                    </p>
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <a href="{{ route('pengaduan.tanggapan', $item->id_pengaduan) }}"
+                                                        class="btn btn-primary">
+                                                        Tanggapi Pengaduan
+                                                    </a>
+
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">
+                                                        Tutup
+                                                    </button>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if ($item->is_complain && $item->status->status == 'Selesai')
+                                    <div class="modal fade" id="komplainSelesaiModal{{ $item->id_pengaduan }}"
+                                        tabindex="-1">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-success text-white">
+                                                    <h5 class="modal-title">
+                                                        Komplain Telah Diselesaikan
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+
+                                                <div class="modal-body">
+                                                    <p><strong>Dari Pengadu:</strong></p>
+                                                    <p>{{ $item->user->nama }}</p>
+                                                    <p><strong>Isi Komplain:</strong></p>
+                                                    <div class="border rounded p-3 bg-light mb-3">
+                                                        {{ $item->isi_komplain }}
+                                                    </div>
+
+                                                    <p class="text-muted">
+                                                        Tanggal Komplain:
+                                                        {{ \Carbon\Carbon::parse($item->tanggal_komplain)->format('d M Y') }}
+                                                    </p>
+
+                                                    <hr>
+
+                                                    <p><strong>Tanggapan Admin:</strong></p>
+                                                    <div class="border rounded p-3 bg-success-subtle">
+                                                        {{ $item->tanggapan->first()->tanggapan ?? '-' }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">
+                                                        Tutup
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             @endforeach
                         </tbody>
                     </table>

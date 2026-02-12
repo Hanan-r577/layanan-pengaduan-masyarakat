@@ -146,7 +146,7 @@
                                 </p>
                                 <span class="badge bg-secondary">
                                     {{ $item->status->status }}
-                                </span>
+                                </span> 
                             </div>
                         </div>
 

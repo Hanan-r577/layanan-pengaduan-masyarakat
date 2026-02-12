@@ -55,6 +55,7 @@ class KategoriController extends Controller
     public function edit(string $id)
     {
         $kategori = Kategori::findOrFail($id);
+
         return view('admin.kategori.edit', compact('kategori'));
     }
 
@@ -64,7 +65,7 @@ class KategoriController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'nama_kategori' => 'required|string|max:255|unique:kategori,nama_kategori,' . $id . ',id_kategori',
+            'nama_kategori' => 'required|string|max:255|unique:kategori,nama_kategori,'.$id.',id_kategori',
         ]);
 
         $kategori = Kategori::findOrFail($id);
@@ -81,8 +82,18 @@ class KategoriController extends Controller
     public function destroy(string $id)
     {
         $kategori = Kategori::findOrFail($id);
+
+        // cek apakah masih ada pengaduan pakai kategori ini
+        $dipakai = \App\Models\Pengaduan::where('kategori_id', $kategori->id_kategori)->exists();
+
+        if ($dipakai) {
+            return redirect()
+                ->route('kategori.index')
+                ->with('error', 'Kategori tidak bisa dihapus karena masih digunakan oleh pengaduan.');
+        }
+
         $kategori->delete();
 
-        return redirect()->route('kategori.index')->with('success', 'Kategori deleted successfully.');
+        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil dihapus!.');
     }
 }

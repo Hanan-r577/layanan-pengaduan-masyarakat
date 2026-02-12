@@ -58,7 +58,7 @@ class PengaduanController extends Controller
             'judul' => 'required|string|max:255',
             'isi_laporan' => 'required|string',
             'alamat' => 'required|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         // 🔹 ambil status "Pending"
@@ -194,8 +194,7 @@ class PengaduanController extends Controller
 
         $pengaduan = Pengaduan::with('status')
             ->where('user_id', $userId)
-            ->latest()
-            ->get();
+            ->latest()->get();
 
         return view('masyarakat.index', [
             'pengaduan' => $pengaduan,
@@ -234,10 +233,9 @@ class PengaduanController extends Controller
             'kategori_id' => 'required|exists:kategori,id_kategori',
             'isi_laporan' => 'required|string',
             'alamat' => 'required|string',
-            'foto' => 'nullable|image|max:2048',
+            'foto' => 'required|image|max:2048',
         ]);
 
-        $foto = null;
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto')->store('pengaduan', 'public');
         }
@@ -264,6 +262,27 @@ class PengaduanController extends Controller
         $pengaduan->load(['user', 'kategori', 'status', 'lampiran', 'tanggapan.petugas']);
 
         return view('masyarakat.pengaduan.show', compact('pengaduan'));
+    }
+
+    public function komplain(Request $request, $id_pengaduan)
+    {
+
+        $request->validate([
+            'isi_komplain' => 'required|string',
+        ]);
+
+        $pengaduan = Pengaduan::withoutGlobalScopes()->findOrFail($id_pengaduan);
+
+        if ($pengaduan->status_pengaduan === 'Selesai') {
+            return back()->with('error', 'Komplain sudah diselesaikan.');
+        }
+
+        $pengaduan->is_complain = true;
+        $pengaduan->isi_komplain = $request->isi_komplain;
+        $pengaduan->tanggal_komplain = now();
+        $pengaduan->save();
+
+        return back()->with('success', 'Komplain berhasil dikirim.');
     }
 
     public function tolak(Request $request, $id)

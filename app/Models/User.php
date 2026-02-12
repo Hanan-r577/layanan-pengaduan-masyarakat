@@ -25,6 +25,11 @@ class User extends Authenticatable
         'level',
     ];
 
+    public function chatMessages()
+    {
+        return $this->hasMany(ChatMessage::class, 'user_id');
+    }
+
     protected $hidden = [
         'password',
         'remember_token',

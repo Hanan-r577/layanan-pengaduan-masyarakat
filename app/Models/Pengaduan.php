@@ -19,7 +19,15 @@ class Pengaduan extends Model
         'alasan_penolakan',
         'foto',
         'status_pengaduan_id',
+            'is_complain',
+        'tanggal_komplain',
+        'isi_komplain',
     ];
+
+    protected $casts = [
+    'tanggal_komplain' => 'datetime',
+    'is_complain' => 'boolean',
+];
 
     public function user()
     {

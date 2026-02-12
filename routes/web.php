@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LampiranController;
@@ -23,6 +24,9 @@ Route::get('/', [MasyarakatController::class, 'index'])
 Route::get('/register', [RegisteredUserController::class, 'show'])->name('register');
 Route::post('/register', [RegisteredUserController::class, 'store']);
 
+Route::post('/chat/start', [ChatController::class, 'start'])
+    ->name('chat.start');
+
 /*
 |--------------------------------------------------------------------------
 | PROTECTED ROUTES (AUTH)
@@ -30,6 +34,15 @@ Route::post('/register', [RegisteredUserController::class, 'store']);
 */
 
 Route::middleware('auth')->group(function () {
+
+    Route::post('/chat/send', [ChatController::class, 'send'])
+        ->name('chat.send');
+
+    Route::get('/chat/messages/{id}', [ChatController::class, 'messages'])
+        ->name('chat.messages');
+
+    Route::get('/chat/get-session', [ChatController::class, 'getSession'])
+        ->name('chat.getSession');
 
     Route::get('/my_account', [\App\Http\Controllers\MyAccountController::class, 'index'])
         ->name('my.account');
@@ -48,6 +61,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/pengaduan-saya/{pengaduan}', [PengaduanController::class, 'masyarakatShow'])
         ->name('pengaduan.masyarakat.show');
+
+    Route::post('/pengaduan/{id}/komplain', [PengaduanController::class, 'komplain'])
+        ->name('pengaduan.komplain');
 
     // Logout (WAJIB DI SINI)
     Route::post('/logout', function () {
@@ -74,6 +90,15 @@ Route::middleware(['auth', 'level:admin'])->group(function () {
     // Pengaduan Admin
     Route::resource('pengaduan', PengaduanController::class);
     Route::resource('tanggapan', TanggapanController::class);
+
+    Route::get('/chat', [ChatController::class, 'indexAdmin'])
+        ->name('admin.chat.index');
+
+    Route::get('/chat/{id}', [ChatController::class, 'showAdmin'])
+        ->name('admin.chat.show');
+
+    Route::post('/chat/reply', [ChatController::class, 'replyAdmin'])
+        ->name('admin.chat.reply');
 
     Route::get(
         'pengaduan/{pengaduan}/tanggapan',
@@ -108,6 +133,9 @@ Route::middleware(['auth', 'level:admin'])->group(function () {
         '/lampiran/{lampiran}',
         [LampiranController::class, 'destroy']
     )->name('lampiran.destroy');
+
+    Route::put('/admin/chat/{id}/close', [ChatController::class, 'close'])
+        ->name('admin.chat.close');
 
 });
 

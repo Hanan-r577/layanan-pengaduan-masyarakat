@@ -74,7 +74,7 @@
                     @enderror
 
                     <div class="mb-3">
-                        <label for="foto" class="form-label">Foto Bukti (Jika ada)</label>
+                        <label for="foto" class="form-label">Foto Bukti</label>
                         <input type="file" class="form-control" id="foto" name="foto">
                     </div>
                     @error('foto')

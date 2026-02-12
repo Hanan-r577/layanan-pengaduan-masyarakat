@@ -42,8 +42,8 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Foto (Opsional)</label>
-                                <input type="file" name="foto" class="form-control">
+                                <label class="form-label">Foto</label>
+                                <input type="file" name="foto" class="form-control" required>
                             </div>
 
                             <button class="btn btn-warning">Kirim Pengaduan</button>
