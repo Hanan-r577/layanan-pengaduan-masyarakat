@@ -11,7 +11,7 @@ class User extends Authenticatable
 
     protected $table = 'users';
 
-    protected $primaryKey = 'id_user'; // ⬅️ WAJIB
+    protected $primaryKey = 'id_user'; // 
 
     public $incrementing = true;
 
